@@ -202,7 +202,7 @@ class Hand(object):
                 x_n, y_n = coords[i][j]
                 x -= min_x-offset; y -= min_y-offset
                 x_n -= min_x-offset; y_n -= min_y-offset
-                draw.line([(x,y), (x_n,y_n)], fill="black", width=dotSize)
+                draw.line([(x,y), (x_n,y_n)], fill="black", width=width)
 
         imsave(filename, img.astype(np.uint8))
 
