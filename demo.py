@@ -199,6 +199,9 @@ class Hand(object):
         for i in range(len(coords)):
             for j in range(len(coords[i]))[start:]:
                 x, y = coords[i][j-1]
+
+                print(x, y)
+
                 x_n, y_n = coords[i][j]
                 x -= min_x-offset; y -= min_y-offset
                 x_n -= min_x-offset; y_n -= min_y-offset
