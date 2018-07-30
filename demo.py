@@ -204,7 +204,7 @@ class Hand(object):
                 x_n -= min_x-offset; y_n -= min_y-offset
                 draw.line([(x,y), (x_n,y_n)], fill="black", width=width)
 
-        imsave(filename, img.astype(np.uint8))
+        imsave(filename, np.array(img).astype(np.uint8))
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
