@@ -9,6 +9,8 @@ import drawing
 #import lyrics
 from rnn import rnn
 import tensorflow as tf
+from PIL import Image, ImageDraw
+from scipy.misc import imsave
 
 #docker build -t handwriting-synthesis:latest .
 #nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
@@ -63,10 +65,8 @@ class Hand(object):
                     )
 
         strokes = self._sample(lines, biases=biases, styles=styles)
-
-        print(strokes)
-
-        self._draw(strokes, lines, filename, stroke_colors=stroke_colors, stroke_widths=stroke_widths)
+        #self._draw(strokes, lines, filename, stroke_colors=stroke_colors, stroke_widths=stroke_widths)
+        self.coords2img(strokes, filename, autoscale=(64,64), dotSize=stroke_widths, offset=5)
 
     def _sample(self, lines, biases=None, styles=None):
         num_samples = len(lines)
@@ -155,46 +155,57 @@ class Hand(object):
 
         dwg.save()
 
-    def _draw_png(self, strokes, lines, filename, stroke_colors=None, stroke_widths=None):
-        stroke_colors = stroke_colors or ['black']*len(lines)
-        stroke_widths = stroke_widths or [2]*len(lines)
+    def dist(self, a, b):
+        return np.power((np.power((a[0] - b[0]), 2) + np.power((a[1] - b[1]), 2)), 1./2)
 
-        line_height = 60
-        view_width = 1000
-        view_height = line_height*(len(strokes) + 1)
+    def coords2img(self, strokes, filename, width=3, autoscale=(64,64), offset=5):
 
-        dwg = svgwrite.Drawing(filename=filename)
-        dwg.viewbox(width=view_width, height=view_height)
-        dwg.add(dwg.rect(insert=(0, 0), size=(view_width, view_height), fill='white'))
+        def min_max(coords):
+            max_x, min_x = int(np.max(np.concatenate([coord[:, 0] for coord in coords]))), int(np.min(np.concatenate([coord[:, 0] for coord in coords]))) 
+            max_y, min_y = int(np.max(np.concatenate([coord[:, 1] for coord in coords]))), int(np.min(np.concatenate([coord[:, 1] for coord in coords])))
+            return min_x, max_x, min_y, max_y
 
-        initial_coord = np.array([0, -(3*line_height / 4)])
-        for offsets, line, color, width in zip(strokes, lines, stroke_colors, stroke_widths):
+        for coords, dotSize in zip(strokes, width):
 
-            if not line:
-                initial_coord[1] -= line_height
-                continue
+            detachments = [0]+list(np.where(coords[:, 2])[0])
+            coords = np.array([coords[detachments[i]:detachments[i+1], :2] for i in range(len(detachments)-1)])
+            
+            min_dists, dists = {}, [[] for i in range(len(coords))]
+            for i, line in enumerate(coords):
+                for point in line:
+                    dists[i].append(self.dist([0, 0], point))
+                min_dists[min(dists[i])] = i
+                    
+            min_dist = min(list(min_dists.keys()))
+            min_index = min_dists[min_dist]
+            start_point = coords[min_index][dists[min_index].index(min_dist)].copy()
+            for i in range(len(coords)):
+                coords[i] -= start_point
+            min_x, max_x, min_y, max_y = min_max(coords) 
+            scaleX = ((max_x - min_x) / (autoscale[0]-(offset*2-1)))
+            scaleY = ((max_y - min_y) / (autoscale[1]-(offset*2-1)))
+            for line in coords:
+                line[:, 0] = line[:, 0] / scaleX
+                line[:, 1] = line[:, 1] / scaleY
 
-            offsets[:, :2] *= 1.5
-            strokes = drawing.offsets_to_coords(offsets)
-            strokes = drawing.denoise(strokes)
-            strokes[:, :2] = drawing.align(strokes[:, :2])
+            min_x, max_x, min_y, max_y = min_max(coords)
+                
+            w = max_x-min_x+offset*2
+            h = max_y-min_y+offset*2
 
-            strokes[:, 1] *= -1
-            strokes[:, :2] -= strokes[:, :2].min() + initial_coord
-            strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
+            img = Image.new("RGB", (w, h), "white")
+            draw = ImageDraw.Draw(img)
 
-            prev_eos = 1.0
-            p = "M{},{} ".format(0, 0)
-            for x, y, eos in zip(*strokes.T):
-                p += '{}{},{} '.format('M' if prev_eos == 1.0 else 'L', x, y)
-                prev_eos = eos
-            path = svgwrite.path.Path(p)
-            path = path.stroke(color=color, width=width, linecap='round').fill("none")
-            dwg.add(path)
+            start = 1
+            for i in range(len(coords)):
+                for j in range(len(coords[i]))[start:]:
+                    x, y = coords[i][j-1]
+                    x_n, y_n = coords[i][j]
+                    x -= min_x-offset; y -= min_y-offset
+                    x_n -= min_x-offset; y_n -= min_y-offset
+                    draw.line([(x,y), (x_n,y_n)], fill="black", width=dotSize)
 
-            initial_coord[1] -= line_height
-
-        dwg.save()
+            imsave(filename, img.astype(np.uint8))
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
@@ -213,7 +224,8 @@ if __name__ == '__main__':
             for style in styles: 
                 for bias in biases:
                     hand.write(
-                        filename='/home/imgs/%s.svg' % value,
+                        #filename='/home/imgs/%s.svg' % value,
+                        filename='/home/imgs/%s.png' % value,
                         lines=[key],
                         biases=[bias],
                         styles=[style],
