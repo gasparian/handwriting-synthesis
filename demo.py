@@ -158,54 +158,53 @@ class Hand(object):
     def dist(self, a, b):
         return np.power((np.power((a[0] - b[0]), 2) + np.power((a[1] - b[1]), 2)), 1./2)
 
-    def coords2img(self, strokes, filename, width=3, autoscale=(64,64), offset=5):
+    def coords2img(self, coords, filename, width=3, autoscale=(64,64), offset=5):
 
         def min_max(coords):
             max_x, min_x = int(np.max(np.concatenate([coord[:, 0] for coord in coords]))), int(np.min(np.concatenate([coord[:, 0] for coord in coords]))) 
             max_y, min_y = int(np.max(np.concatenate([coord[:, 1] for coord in coords]))), int(np.min(np.concatenate([coord[:, 1] for coord in coords])))
             return min_x, max_x, min_y, max_y
 
-        for coords, dotSize in zip(strokes, width):
-
-            detachments = [0]+list(np.where(coords[:, 2])[0])
-            coords = np.array([coords[detachments[i]:detachments[i+1], :2] for i in range(len(detachments)-1)])
-            
-            min_dists, dists = {}, [[] for i in range(len(coords))]
-            for i, line in enumerate(coords):
-                for point in line:
-                    dists[i].append(self.dist([0, 0], point))
-                min_dists[min(dists[i])] = i
-                    
-            min_dist = min(list(min_dists.keys()))
-            min_index = min_dists[min_dist]
-            start_point = coords[min_index][dists[min_index].index(min_dist)].copy()
-            for i in range(len(coords)):
-                coords[i] -= start_point
-            min_x, max_x, min_y, max_y = min_max(coords) 
-            scaleX = ((max_x - min_x) / (autoscale[0]-(offset*2-1)))
-            scaleY = ((max_y - min_y) / (autoscale[1]-(offset*2-1)))
-            for line in coords:
-                line[:, 0] = line[:, 0] / scaleX
-                line[:, 1] = line[:, 1] / scaleY
-
-            min_x, max_x, min_y, max_y = min_max(coords)
+        #detachments = [0]+list(np.where(coords[:, 2])[0])
+        #coords = np.array([coords[detachments[i]:detachments[i+1], :2] for i in range(len(detachments)-1)])
+        coords = np.array([coord[:, :2] for coord in coords])
+        
+        min_dists, dists = {}, [[] for i in range(len(coords))]
+        for i, line in enumerate(coords):
+            for point in line:
+                dists[i].append(self.dist([0, 0], point))
+            min_dists[min(dists[i])] = i
                 
-            w = max_x-min_x+offset*2
-            h = max_y-min_y+offset*2
+        min_dist = min(list(min_dists.keys()))
+        min_index = min_dists[min_dist]
+        start_point = coords[min_index][dists[min_index].index(min_dist)].copy()
+        for i in range(len(coords)):
+            coords[i] -= start_point
+        min_x, max_x, min_y, max_y = min_max(coords) 
+        scaleX = ((max_x - min_x) / (autoscale[0]-(offset*2-1)))
+        scaleY = ((max_y - min_y) / (autoscale[1]-(offset*2-1)))
+        for line in coords:
+            line[:, 0] = line[:, 0] / scaleX
+            line[:, 1] = line[:, 1] / scaleY
 
-            img = Image.new("RGB", (w, h), "white")
-            draw = ImageDraw.Draw(img)
+        min_x, max_x, min_y, max_y = min_max(coords)
+            
+        w = max_x-min_x+offset*2
+        h = max_y-min_y+offset*2
 
-            start = 1
-            for i in range(len(coords)):
-                for j in range(len(coords[i]))[start:]:
-                    x, y = coords[i][j-1]
-                    x_n, y_n = coords[i][j]
-                    x -= min_x-offset; y -= min_y-offset
-                    x_n -= min_x-offset; y_n -= min_y-offset
-                    draw.line([(x,y), (x_n,y_n)], fill="black", width=dotSize)
+        img = Image.new("RGB", (w, h), "white")
+        draw = ImageDraw.Draw(img)
 
-            imsave(filename, img.astype(np.uint8))
+        start = 1
+        for i in range(len(coords)):
+            for j in range(len(coords[i]))[start:]:
+                x, y = coords[i][j-1]
+                x_n, y_n = coords[i][j]
+                x -= min_x-offset; y -= min_y-offset
+                x_n -= min_x-offset; y_n -= min_y-offset
+                draw.line([(x,y), (x_n,y_n)], fill="black", width=dotSize)
+
+        imsave(filename, img.astype(np.uint8))
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
