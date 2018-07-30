@@ -66,7 +66,7 @@ class Hand(object):
 
         strokes = self._sample(lines, biases=biases, styles=styles)
         #self._draw(strokes, lines, filename, stroke_colors=stroke_colors, stroke_widths=stroke_widths)
-        self.coords2img(strokes, filename, autoscale=(64,64), dotSize=stroke_widths, offset=5)
+        self.coords2img(strokes, filename, autoscale=(64,64), width=stroke_widths, offset=5)
 
     def _sample(self, lines, biases=None, styles=None):
         num_samples = len(lines)
