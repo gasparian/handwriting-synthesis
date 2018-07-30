@@ -66,7 +66,7 @@ class Hand(object):
 
         strokes = self._sample(lines, biases=biases, styles=styles)
         #self._draw(strokes, lines, filename, stroke_colors=stroke_colors, stroke_widths=stroke_widths)
-        self.coords2img(strokes, filename, autoscale=(64,64), width=stroke_widths, offset=5)
+        self.coords2img(strokes, filename, autoscale=(64,64), width=3, offset=5)
 
     def _sample(self, lines, biases=None, styles=None):
         num_samples = len(lines)
@@ -199,9 +199,6 @@ class Hand(object):
         for i in range(len(coords)):
             for j in range(len(coords[i]))[start:]:
                 x, y = coords[i][j-1]
-
-                print(x, y)
-
                 x_n, y_n = coords[i][j]
                 x -= min_x-offset; y -= min_y-offset
                 x_n -= min_x-offset; y_n -= min_y-offset
