@@ -8,8 +8,10 @@ import svgwrite
 import drawing
 #import lyrics
 from rnn import rnn
+import tensorflow as tf
 
-#nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm <image name> bash
+#docker build -t handwriting-synthesis:latest .
+#nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
 
 class Hand(object):
 
@@ -150,28 +152,27 @@ class Hand(object):
 
         dwg.save()
 
-
 if __name__ == '__main__':
-    hand = Hand()
+    with tf.device('/gpu:0'):
+        hand = Hand()
+        #words = [i[:-1] for i in open("/home/imgs/words.txt").readlines()]
+        words = ["0102", "hello world!"]
 
-    #words = [i[:-1] for i in open("/home/imgs/words.txt").readlines()]
-    words = ["0102", "hello world!"]
+        lines = {word:str(uuid.uuid4()) for word in words}
 
-    lines = {word:str(uuid.uuid4()) for word in words}
+        biases = [.75 for i in lines]
+        styles = [9 for i in lines]
+        stroke_colors = ['black']
+        stroke_widths = [3]
 
-    biases = [.75 for i in lines]
-    styles = [9 for i in lines]
-    stroke_colors = ['black']
-    stroke_widths = [3]
-
-    for key, value in lines.items():
-        for style in styles: 
-            for bias in biases:
-                hand.write(
-                    filename='/home/imgs/%s.svg' % value,
-                    lines=[key],
-                    biases=[bias],
-                    styles=[style],
-                    stroke_colors=stroke_colors,
-                    stroke_widths=stroke_widths
-                )
+        for key, value in lines.items():
+            for style in styles: 
+                for bias in biases:
+                    hand.write(
+                        filename='/home/imgs/%s.svg' % value,
+                        lines=[key],
+                        biases=[bias],
+                        styles=[style],
+                        stroke_colors=stroke_colors,
+                        stroke_widths=stroke_widths
+                    )
