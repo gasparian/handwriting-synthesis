@@ -180,10 +180,6 @@ class Hand(object):
             strokes[:, 0] -= min_x - offset
             strokes[:, 1] -= min_y - offset
 
-            #strokes[:, :2] -= strokes[:, :2].min() + np.array([[offset, 0]])
-            #strokes[:, :2] -= strokes[:, :2].min() + initial_coord
-            #strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
-
             view_width = (strokes[:, 0].max() - strokes[:, 0].min()) + (offset + width)*2
             view_height = (strokes[:, 1].max() - strokes[:, 1].min()) + (offset + width)*2  
 
