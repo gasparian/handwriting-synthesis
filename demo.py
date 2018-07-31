@@ -178,7 +178,7 @@ class Hand(object):
             min_x, min_y = strokes[:, 0].min(), strokes[:, 1].min()
             strokes[:, 1] *= -1
             strokes[:, 0] -= min_x - offset
-            strokes[:, 0] -= min_x + offset
+            strokes[:, 1] -= min_y - offset
 
             #strokes[:, :2] -= strokes[:, :2].min() + np.array([[offset, 0]])
             #strokes[:, :2] -= strokes[:, :2].min() + initial_coord
