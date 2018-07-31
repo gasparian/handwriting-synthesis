@@ -1,4 +1,5 @@
 import os
+import pickle
 import logging
 import uuid
 
@@ -162,9 +163,9 @@ class Hand(object):
         initial_coord = np.array([0, -(3*line_height / 4)])
         for offsets, line in zip(strokes, lines):
 
-            if not line:
-                initial_coord[1] -= line_height
-                continue
+            # if not line:
+            #     initial_coord[1] -= line_height
+            #     continue
 
             offsets[:, :2] *= 1.5
             strokes = drawing.offsets_to_coords(offsets)
@@ -172,7 +173,7 @@ class Hand(object):
             strokes[:, :2] = drawing.align(strokes[:, :2])
 
             strokes[:, 1] *= -1
-            strokes[:, :2] -= strokes[:, :2].min() + initial_coord
+            strokes[:, :2] -= strokes[:, :2].min()
             # strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
 
             view_width = (strokes[:, 0].max() - strokes[:, 0].min()) + offset*2
@@ -191,7 +192,7 @@ class Hand(object):
             path = path.stroke(color='black', width=width, linecap='round').fill("none")
             dwg.add(path)
 
-            initial_coord[1] -= line_height
+            #initial_coord[1] -= line_height
 
         dwg.save()
 
@@ -254,11 +255,13 @@ class Hand(object):
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
+
         hand = Hand()
         #words = [i[:-1] for i in open("/home/imgs/words.txt").readlines()]
         words = ["0102", "hello world!", "1) 2) 3)"]
 
         lines = {word:str(uuid.uuid4()) for word in words}
+        pickle.dump(lines, open('/home/imgs/pics_names.pickle.dat', 'wb'))
 
         biases = [.75 for i in lines]
         styles = [9 for i in lines]
@@ -270,7 +273,6 @@ if __name__ == '__main__':
                 for bias in biases:
                     hand.write(
                         filename='/home/imgs/%s.svg' % value,
-                        #filename='/home/imgs/%s.png' % value,
                         lines=[key],
                         biases=[bias],
                         styles=[style],
