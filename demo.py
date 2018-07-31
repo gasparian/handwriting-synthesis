@@ -269,8 +269,8 @@ if __name__ == '__main__':
             for style in styles: 
                 for bias in biases:
                     hand.write(
-                        #filename='/home/imgs/%s.svg' % value,
-                        filename='/home/imgs/%s.png' % value,
+                        filename='/home/imgs/%s.svg' % value,
+                        #filename='/home/imgs/%s.png' % value,
                         lines=[key],
                         biases=[bias],
                         styles=[style],
