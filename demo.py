@@ -2,6 +2,7 @@ import os
 import pickle
 import logging
 import uuid
+import time
 
 import numpy as np
 import svgwrite
@@ -173,7 +174,7 @@ class Hand(object):
             strokes[:, :2] = drawing.align(strokes[:, :2])
 
             strokes[:, 1] *= -1
-            strokes[:, :2] -= strokes[:, :2].min() + np.array([[5, 0]])
+            strokes[:, :2] -= strokes[:, :2].min() + np.array([[0, 5]])
 
             #strokes[:, :2] -= strokes[:, :2].min() + initial_coord
             #strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
@@ -257,6 +258,7 @@ class Hand(object):
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
+        start = time.time()
 
         hand = Hand()
         #words = [i[:-1] for i in open("/home/imgs/words.txt").readlines()]
@@ -279,5 +281,6 @@ if __name__ == '__main__':
                         biases=[bias],
                         styles=[style],
                         stroke_colors=stroke_colors,
-                        stroke_widths=stroke_widths
-                    )
+                        stroke_widths=stroke_widths)
+
+        print('Prediction time: %s s' % time.time()-start)
