@@ -175,9 +175,12 @@ class Hand(object):
             strokes = drawing.denoise(strokes)
             strokes[:, :2] = drawing.align(strokes[:, :2])
 
+            min_x, min_y = strokes[:, 0].min(), strokes[:, 1].min()
             strokes[:, 1] *= -1
-            strokes[:, :2] -= strokes[:, :2].min() + np.array([[offset, 0]])
+            strokes[:, 0] -= min_x - offset
+            strokes[:, 0] -= min_x + offset
 
+            #strokes[:, :2] -= strokes[:, :2].min() + np.array([[offset, 0]])
             #strokes[:, :2] -= strokes[:, :2].min() + initial_coord
             #strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
 
