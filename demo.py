@@ -160,7 +160,7 @@ class Hand(object):
 
         line_height = 60
         initial_coord = np.array([0, -(3*line_height / 4)])
-        for offsets, line, color, width in zip(strokes, lines):
+        for offsets, line in zip(strokes, lines):
 
             if not line:
                 initial_coord[1] -= line_height
