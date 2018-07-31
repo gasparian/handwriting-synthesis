@@ -157,13 +157,8 @@ class Hand(object):
     #     dwg.save()
 
     def _draw(self, strokes, lines, filename, width=3, offset=5):
-        stroke_colors = stroke_colors or ['black']*len(lines)
-        stroke_widths = stroke_widths or [2]*len(lines)
 
         line_height = 60
-        view_width = 1000
-        view_height = line_height*(len(strokes) + 1)
-
         initial_coord = np.array([0, -(3*line_height / 4)])
         for offsets, line, color, width in zip(strokes, lines):
 
