@@ -177,8 +177,8 @@ class Hand(object):
 
             min_x, min_y = strokes[:, 0].min(), strokes[:, 1].min()
             strokes[:, 1] *= -1
-            strokes[:, 0] -= min_x - offset
-            strokes[:, 1] -= min_y - offset
+            strokes[:, 0] -= min_x + offset
+            strokes[:, 1] -= min_y + offset
 
             #strokes[:, :2] -= strokes[:, :2].min() + np.array([[offset, 0]])
             #strokes[:, :2] -= strokes[:, :2].min() + initial_coord
@@ -285,4 +285,4 @@ if __name__ == '__main__':
                         stroke_colors=stroke_colors,
                         stroke_widths=stroke_widths)
 
-        print('Prediction time: %s s' % time.time()-start)
+        print('Prediction time: %s s' % (time.time()-start))
