@@ -176,10 +176,8 @@ class Hand(object):
             strokes[:, :2] = drawing.align(strokes[:, :2])
 
             strokes[:, 1] *= -1
-            strokes[:, 0] -= strokes[:, 0].min() + offset
-            strokes[:, 1] -= strokes[:, 1].min() + offset
+            strokes[:, :2] -= strokes[:, :2].min() + np.array([[offset, 0]])
 
-            #strokes[:, :2] -= strokes[:, :2].min() + np.array([[offset, 0]])
             #strokes[:, :2] -= strokes[:, :2].min() + initial_coord
             #strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
 
