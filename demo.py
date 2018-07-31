@@ -17,6 +17,12 @@ from scipy.misc import imsave
 #docker build -t handwriting-synthesis:latest .
 #nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
 
+#drops isolated pixels
+# se1 = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
+# se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+# img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, se1)
+# img = cv2.morphologyEx(img, cv2.MORPH_OPEN, se2)
+
 class Hand(object):
 
     def __init__(self):
@@ -164,18 +170,16 @@ class Hand(object):
         initial_coord = np.array([0, -(3*line_height / 4)])
         for offsets, line in zip(strokes, lines):
 
-            # if not line:
-            #     initial_coord[1] -= line_height
-            #     continue
-
             offsets[:, :2] *= 1.5
             strokes = drawing.offsets_to_coords(offsets)
             strokes = drawing.denoise(strokes)
             strokes[:, :2] = drawing.align(strokes[:, :2])
 
             strokes[:, 1] *= -1
-            strokes[:, :2] -= strokes[:, :2].min() + np.array([[0, 5]])
+            strokes[:, 0] -= strokes[:, 0].min() + offset
+            strokes[:, 1] -= strokes[:, 1].min() + offset
 
+            #strokes[:, :2] -= strokes[:, :2].min() + np.array([[offset, 0]])
             #strokes[:, :2] -= strokes[:, :2].min() + initial_coord
             #strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
 
@@ -194,9 +198,6 @@ class Hand(object):
             path = svgwrite.path.Path(p)
             path = path.stroke(color='black', width=width, linecap='round').fill("none")
             dwg.add(path)
-
-            #initial_coord[1] -= line_height
-
         dwg.save()
 
     def dist(self, a, b):
