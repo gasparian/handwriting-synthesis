@@ -65,8 +65,8 @@ class Hand(object):
                     )
 
         strokes = self._sample(lines, biases=biases, styles=styles)
-        #self._draw(strokes, lines, filename, stroke_colors=stroke_colors, stroke_widths=stroke_widths)
-        self.coords2img(strokes, filename, autoscale=(64,64), width=3, offset=5)
+        self._draw(strokes, lines, filename, stroke_colors=stroke_colors, stroke_widths=stroke_widths)
+        #self.coords2img(strokes, filename, autoscale=(64,64), width=3, offset=5)
 
     def _sample(self, lines, biases=None, styles=None):
         num_samples = len(lines)
@@ -114,7 +114,48 @@ class Hand(object):
         samples = [sample[~np.all(sample == 0.0, axis=1)] for sample in samples]
         return samples
 
-    def _draw(self, strokes, lines, filename, stroke_colors=None, stroke_widths=None):
+    # def _draw(self, strokes, lines, filename, stroke_colors=None, stroke_widths=None):
+    #     stroke_colors = stroke_colors or ['black']*len(lines)
+    #     stroke_widths = stroke_widths or [2]*len(lines)
+
+    #     line_height = 60
+    #     view_width = 1000
+    #     view_height = line_height*(len(strokes) + 1)
+
+    #     dwg = svgwrite.Drawing(filename=filename)
+    #     dwg.viewbox(width=view_width, height=view_height)
+    #     dwg.add(dwg.rect(insert=(0, 0), size=(view_width, view_height), fill='white'))
+
+    #     initial_coord = np.array([0, -(3*line_height / 4)])
+    #     for offsets, line, color, width in zip(strokes, lines, stroke_colors, stroke_widths):
+
+    #         if not line:
+    #             initial_coord[1] -= line_height
+    #             continue
+
+    #         offsets[:, :2] *= 1.5
+    #         strokes = drawing.offsets_to_coords(offsets)
+    #         strokes = drawing.denoise(strokes)
+    #         strokes[:, :2] = drawing.align(strokes[:, :2])
+
+    #         strokes[:, 1] *= -1
+    #         strokes[:, :2] -= strokes[:, :2].min() + initial_coord
+    #         strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
+
+    #         prev_eos = 1.0
+    #         p = "M{},{} ".format(0, 0)
+    #         for x, y, eos in zip(*strokes.T):
+    #             p += '{}{},{} '.format('M' if prev_eos == 1.0 else 'L', x, y)
+    #             prev_eos = eos
+    #         path = svgwrite.path.Path(p)
+    #         path = path.stroke(color=color, width=width, linecap='round').fill("none")
+    #         dwg.add(path)
+
+    #         initial_coord[1] -= line_height
+
+    #     dwg.save()
+
+    def _draw(self, strokes, lines, filename, width=3, offset=5):
         stroke_colors = stroke_colors or ['black']*len(lines)
         stroke_widths = stroke_widths or [2]*len(lines)
 
@@ -122,12 +163,8 @@ class Hand(object):
         view_width = 1000
         view_height = line_height*(len(strokes) + 1)
 
-        dwg = svgwrite.Drawing(filename=filename)
-        dwg.viewbox(width=view_width, height=view_height)
-        dwg.add(dwg.rect(insert=(0, 0), size=(view_width, view_height), fill='white'))
-
         initial_coord = np.array([0, -(3*line_height / 4)])
-        for offsets, line, color, width in zip(strokes, lines, stroke_colors, stroke_widths):
+        for offsets, line, color, width in zip(strokes, lines):
 
             if not line:
                 initial_coord[1] -= line_height
@@ -140,7 +177,14 @@ class Hand(object):
 
             strokes[:, 1] *= -1
             strokes[:, :2] -= strokes[:, :2].min() + initial_coord
-            strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
+            # strokes[:, 0] += (view_width - strokes[:, 0].max()) / 2
+
+            view_width = (strokes[:, 0].max() - strokes[:, 0].min()) + offset*2
+            view_height = (strokes[:, 1].max() - strokes[:, 1].min()) + offset*2
+
+            dwg = svgwrite.Drawing(filename=filename)
+            dwg.viewbox(width=view_width, height=view_height)
+            dwg.add(dwg.rect(insert=(0, 0), size=(view_width, view_height), fill='white'))
 
             prev_eos = 1.0
             p = "M{},{} ".format(0, 0)
@@ -148,7 +192,7 @@ class Hand(object):
                 p += '{}{},{} '.format('M' if prev_eos == 1.0 else 'L', x, y)
                 prev_eos = eos
             path = svgwrite.path.Path(p)
-            path = path.stroke(color=color, width=width, linecap='round').fill("none")
+            path = path.stroke(color='black', width=width, linecap='round').fill("none")
             dwg.add(path)
 
             initial_coord[1] -= line_height
