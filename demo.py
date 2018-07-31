@@ -166,9 +166,9 @@ class Hand(object):
             return min_x, max_x, min_y, max_y
 
         for coords in strokes:
-            coords = offsets_to_coords(coords)
-            coords = denoise(coords)
-            coords[:, :2] = align(coords[:, :2])
+            coords = drawing.offsets_to_coords(coords)
+            coords = drawing.denoise(coords)
+            coords[:, :2] = drawing.align(coords[:, :2])
             coords[:, 1] *= -1
             coords[:, :2] -= coords[:, :2].min()
             
