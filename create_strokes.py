@@ -26,6 +26,53 @@ from scipy.misc import imsave
 # img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, se1)
 # img = cv2.morphologyEx(img, cv2.MORPH_OPEN, se2)
 
+def coords2img(coords, width=3, autoscale=(64,64), offset=5):
+
+    def min_max(coords):
+        max_x, min_x = int(np.max(np.concatenate([coord[:, 0] for coord in coords]))), int(np.min(np.concatenate([coord[:, 0] for coord in coords]))) 
+        max_y, min_y = int(np.max(np.concatenate([coord[:, 1] for coord in coords]))), int(np.min(np.concatenate([coord[:, 1] for coord in coords])))
+        return min_x, max_x, min_y, max_y
+
+    def dist(self, a, b):
+        return np.power((np.power((a[0] - b[0]), 2) + np.power((a[1] - b[1]), 2)), 1./2)
+    
+    min_dists, dists = {}, [[] for i in range(len(coords))]
+    for i, line in enumerate(coords):
+        for point in line:
+            dists[i].append(dist([0, 0], point))
+        min_dists[min(dists[i])] = i
+            
+    min_dist = min(list(min_dists.keys()))
+    min_index = min_dists[min_dist]
+    start_point = coords[min_index][dists[min_index].index(min_dist)].copy()
+    for i in range(len(coords)):
+        coords[i] -= start_point
+    min_x, max_x, min_y, max_y = min_max(coords) 
+    scaleX = ((max_x - min_x) / (autoscale[0]-(offset*2-1)))
+    scaleY = ((max_y - min_y) / (autoscale[1]-(offset*2-1)))
+    for line in coords:
+        line[:, 0] = line[:, 0] / scaleX
+        line[:, 1] = line[:, 1] / scaleY
+
+    min_x, max_x, min_y, max_y = min_max(coords)
+        
+    w = max_x-min_x+offset*2
+    h = max_y-min_y+offset*2
+
+    img = Image.new("RGB", (w, h), "white")
+    draw = ImageDraw.Draw(img)
+
+    start = 1
+    for i in range(len(coords)):
+        for j in range(len(coords[i]))[start:]:
+            x, y = coords[i][j-1]
+            x_n, y_n = coords[i][j]
+            x -= min_x-offset; y -= min_y-offset
+            x_n -= min_x-offset; y_n -= min_y-offset
+            draw.line([(x,y), (x_n,y_n)], fill="black", width=width)
+
+    return img
+
 class Hand(object):
 
     def __init__(self, path):
@@ -140,64 +187,11 @@ class Hand(object):
         if self.counter % 10000 == 0:
             self.prt += 1
 
-        with open(self.path+'_prt_%s.pickle.dat' % self.prt, 'ab') as f:
-            pickle.dump({filename: coords}, f)
-
-    def dist(self, a, b):
-        return np.power((np.power((a[0] - b[0]), 2) + np.power((a[1] - b[1]), 2)), 1./2)
-
-    def coords2img(self, coords, filename, width=3, autoscale=(64,64), offset=5):
-
-        def min_max(coords):
-            max_x, min_x = int(np.max(np.concatenate([coord[:, 0] for coord in coords]))), int(np.min(np.concatenate([coord[:, 0] for coord in coords]))) 
-            max_y, min_y = int(np.max(np.concatenate([coord[:, 1] for coord in coords]))), int(np.min(np.concatenate([coord[:, 1] for coord in coords])))
-            return min_x, max_x, min_y, max_y
-
-        coords = drawing.offsets_to_coords(coords)
-        coords = drawing.denoise(coords)
-        coords[:, :2] = drawing.align(coords[:, :2])
-        coords[:, 1] *= -1
-        coords[:, :2] -= coords[:, :2].min()
-        
-        detachments = [-1]+list(np.where(coords[:, 2])[0])
-        coords = np.array([coords[detachments[i]+1:detachments[i+1], :2] for i in range(len(detachments)-1)])
-        
-        min_dists, dists = {}, [[] for i in range(len(coords))]
-        for i, line in enumerate(coords):
-            for point in line:
-                dists[i].append(self.dist([0, 0], point))
-            min_dists[min(dists[i])] = i
-                
-        min_dist = min(list(min_dists.keys()))
-        min_index = min_dists[min_dist]
-        start_point = coords[min_index][dists[min_index].index(min_dist)].copy()
-        for i in range(len(coords)):
-            coords[i] -= start_point
-        min_x, max_x, min_y, max_y = min_max(coords) 
-        scaleX = ((max_x - min_x) / (autoscale[0]-(offset*2-1)))
-        scaleY = ((max_y - min_y) / (autoscale[1]-(offset*2-1)))
-        for line in coords:
-            line[:, 0] = line[:, 0] / scaleX
-            line[:, 1] = line[:, 1] / scaleY
-
-        min_x, max_x, min_y, max_y = min_max(coords)
-            
-        w = max_x-min_x+offset*2
-        h = max_y-min_y+offset*2
-
-        img = Image.new("RGB", (w, h), "white")
-        draw = ImageDraw.Draw(img)
-
-        start = 1
-        for i in range(len(coords)):
-            for j in range(len(coords[i]))[start:]:
-                x, y = coords[i][j-1]
-                x_n, y_n = coords[i][j]
-                x -= min_x-offset; y -= min_y-offset
-                x_n -= min_x-offset; y_n -= min_y-offset
-                draw.line([(x,y), (x_n,y_n)], fill="black", width=width)
-
-        imsave(filename, np.array(img).astype(np.uint8))
+        coords = json.dumps(str(list([list(coord) for coord in coords])))[1:-1]
+        with open(self.path+'_prt_%s.json' % self.prt, 'a') as f:
+            if self.counter == 1:
+                f.write('{')
+            f.write(filename+':'+coords+',\n')
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
@@ -225,5 +219,8 @@ if __name__ == '__main__':
                         stroke_colors=stroke_colors,
                         stroke_widths=stroke_widths)
 
-        os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
+        with open(path+'_prt_%s.json' % hand.prt, 'a') as f:
+            f.write('}')
+
         print('Prediction time: %s s' % (time.time()-start))
+        os.system('find %s -name "*.json" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
