@@ -188,8 +188,8 @@ class Hand(object):
         current_length = len(self.counter)
         if current_length % 5000 == 0 or current_length == self.length:
             self.prt += 1
-            with open(self.path+'_prt_%s.pickle.dat' % self.prt, 'wb') as f:
-                pickle.dump(self.counter, f)
+            pickle.dump(self.counter, open(self.path+'_prt_%s.pickle.dat' % self.prt, 'wb'))
+            self.counter = {}
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
@@ -204,7 +204,8 @@ if __name__ == '__main__':
         stroke_colors = ['black']
         stroke_widths = [3]
 
-        hand = Hand(path=path, length=len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths))
+        words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
+        hand = Hand(path=path, length=words_count)
 
         for line in tqdm(words, desc='words'):
             for style in styles: 
@@ -217,5 +218,5 @@ if __name__ == '__main__':
                         stroke_colors=stroke_colors,
                         stroke_widths=stroke_widths)
 
-        print('Prediction time: %i words, %s s' % (len(hand.counter), time.time()-start))
+        print('Prediction time: %i words, %s s' % (words_count, time.time()-start))
         os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
