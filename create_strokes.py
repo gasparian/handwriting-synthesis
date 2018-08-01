@@ -187,11 +187,11 @@ class Hand(object):
         if self.counter % 5000 == 0:
             self.prt += 1
 
-        coords = json.dumps(str(list([list(coord) for coord in coords])))[1:-1]
+        coords = json.dump(str(list([list(coord) for coord in coords])))[1:-1]
         with open(self.path+'_prt_%s.json' % self.prt, 'a') as f:
             if self.counter == 1:
                 f.write('{')
-            f.write(filename+':'+coords+',')
+            f.write('"'+filename+'":'+coords+',\n')
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
