@@ -190,8 +190,9 @@ class Hand(object):
         coords = json.dumps(str(list([list(coord) for coord in coords])))[1:-1]
         with open(self.path+'_prt_%s.json' % self.prt, 'a') as f:
             if self.counter == 1:
-                f.write('{')
-            f.write('"'+filename+'":'+coords+',\n')
+                f.write('{"'+filename+'":'+coords)
+            else:
+                f.write(',\n"'+filename+'":'+coords)
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
