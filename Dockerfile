@@ -52,6 +52,7 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         svgwrite \
         Cython \
         pillow \
+        tqdm \
         && \
 
     $PIP_INSTALL \
