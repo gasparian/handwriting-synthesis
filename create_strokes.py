@@ -35,6 +35,9 @@ def coords2img(coords, width=3, autoscale=(64,64), offset=5):
 
     def dist(self, a, b):
         return np.power((np.power((a[0] - b[0]), 2) + np.power((a[1] - b[1]), 2)), 1./2)
+
+    offset += width // 2
+    coords = np.delete(coords, np.where([coord.size==0 for coord in coords]))
     
     min_dists, dists = {}, [[] for i in range(len(coords))]
     for i, line in enumerate(coords):
