@@ -129,7 +129,7 @@ class Hand(object):
     def offsets2coords(self, offsets, filename):
         offsets = drawing.offsets_to_coords(offsets[0])
         offsets = drawing.denoise(offsets)
-        offsets[:, :2] = align(offsets[:, :2])
+        offsets[:, :2] = drawing.align(offsets[:, :2])
         offsets[:, 1] *= -1
         offsets[:, :2] -= offsets[:, :2].min()
         detachments = [-1]+list(np.where(offsets[:, 2])[0])
