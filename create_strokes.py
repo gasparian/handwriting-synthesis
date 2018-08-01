@@ -11,6 +11,7 @@ import svgwrite
 
 import drawing
 #import lyrics
+from tqdm import tqdm
 from rnn import rnn
 import tensorflow as tf
 from PIL import Image, ImageDraw
@@ -213,7 +214,7 @@ if __name__ == '__main__':
         stroke_colors = ['black']
         stroke_widths = [3]
 
-        for line in words:
+        for line in tqdm(words, desc='words'):
             for style in styles: 
                 for bias in biases:
                     hand.write(
@@ -224,5 +225,5 @@ if __name__ == '__main__':
                         stroke_colors=stroke_colors,
                         stroke_widths=stroke_widths)
 
-        os.system('find %s -name "*.pickle.dat" | tar -czvf %s.tar.gz -T -' % ('/'+'/'.join(path.split('/')[:-1]), path.split('/')[-1]))
+        os.system('find %s -name "*.pickle.dat" | tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1]), path.split('/')[-1]))
         print('Prediction time: %s s' % (time.time()-start))
