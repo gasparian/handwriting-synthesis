@@ -215,5 +215,5 @@ if __name__ == '__main__':
                         stroke_colors=stroke_colors,
                         stroke_widths=stroke_widths)
 
-        print('Prediction time: %i words, %s s' % (hand.counter, time.time()-start))
+        print('Prediction time: %i words, %s s' % (len(hand.counter), time.time()-start))
         os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
