@@ -75,7 +75,7 @@ def coords2img(coords, width=3, autoscale=(64,64), offset=5):
 
 class Hand(object):
 
-    def __init__(self, path):
+    def __init__(self, path, length):
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
         self.nn = rnn(
             log_dir='logs',
@@ -104,6 +104,7 @@ class Hand(object):
         self.path = path
         self.counter = {}
         self.prt = 1
+        self.length = length
 
     def write(self, filename, lines, biases=None, styles=None, stroke_colors=None, stroke_widths=None):
         valid_char_set = set(drawing.alphabet)
@@ -184,7 +185,8 @@ class Hand(object):
         coords = np.array([offsets[detachments[i]+1:detachments[i+1], :2] for i in range(len(detachments)-1)])
 
         self.counter.update({str(filename):coords})
-        if len(self.counter) % 5000 == 0:
+        current_length = len(self.counter)
+        if current_length % 5000 == 0 or current_length == self.length:
             self.prt += 1
             with open(self.path+'_prt_%s.pickle.dat' % self.prt, 'wb') as f:
                 pickle.dump(self.counter, f)
@@ -194,10 +196,9 @@ if __name__ == '__main__':
         start = time.time()
 
         path = '/home/imgs/pics_strokes'
-        hand = Hand(path=path)
-
         #words = [i[:-1] for i in open("/home/imgs/words.txt").readlines()]
         words = ["0102", "hello world!", "1) 2) 3)"]
+        hand = Hand(path=path, length=len(words))
 
         biases = [.75 for i in words]
         styles = [9 for i in words]
