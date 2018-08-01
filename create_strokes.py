@@ -187,8 +187,8 @@ class Hand(object):
         self.counter.update({filename:coords})
         current_length = len(self.counter)
 
-        print(current_length)
-        
+        print(self.counter, current_length)
+
         if current_length % 5000 == 0 or current_length == self.length:
             self.prt += 1
             pickle.dump(self.counter, open(self.path+'_prt_%s.pickle.dat' % self.prt, 'wb'))
