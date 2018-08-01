@@ -198,12 +198,13 @@ if __name__ == '__main__':
         path = '/home/imgs/pics_strokes'
         #words = [i[:-1] for i in open("/home/imgs/words.txt").readlines()]
         words = ["0102", "hello world!", "1) 2) 3)"]
-        hand = Hand(path=path, length=len(words))
 
         biases = [.75 for i in words]
         styles = [9 for i in words]
         stroke_colors = ['black']
         stroke_widths = [3]
+
+        hand = Hand(path=path, length=len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths))
 
         for line in tqdm(words, desc='words'):
             for style in styles: 
