@@ -184,14 +184,14 @@ class Hand(object):
         coords = np.array([offsets[detachments[i]+1:detachments[i+1], :2] for i in range(len(detachments)-1)])
 
         self.counter += 1
-        if self.counter % 10000 == 0:
+        if self.counter % 5000 == 0:
             self.prt += 1
 
         coords = json.dumps(str(list([list(coord) for coord in coords])))[1:-1]
         with open(self.path+'_prt_%s.json' % self.prt, 'a') as f:
             if self.counter == 1:
                 f.write('{')
-            f.write(filename+':'+coords+',\n')
+            f.write(filename+':'+coords+',')
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
@@ -222,5 +222,5 @@ if __name__ == '__main__':
         with open(path+'_prt_%s.json' % hand.prt, 'a') as f:
             f.write('}')
 
-        print('Prediction time: %s s' % (time.time()-start))
+        print('Prediction time: %i words, %s s' % (hand.counter, time.time()-start))
         os.system('find %s -name "*.json" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
