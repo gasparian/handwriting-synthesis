@@ -187,7 +187,7 @@ class Hand(object):
         if self.counter % 5000 == 0:
             self.prt += 1
 
-        coords = json.dump(str(list([list(coord) for coord in coords])))[1:-1]
+        coords = json.dumps(str(list([list(coord) for coord in coords])))[1:-1]
         with open(self.path+'_prt_%s.json' % self.prt, 'a') as f:
             if self.counter == 1:
                 f.write('{')
