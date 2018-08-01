@@ -208,12 +208,12 @@ if __name__ == '__main__':
         #words = [i[:-1] for i in open("/home/imgs/words.txt").readlines()]
         words = ["0102", "hello world!", "1) 2) 3)"]
 
-        biases = [.75 for i in lines]
-        styles = [9 for i in lines]
+        biases = [.75 for i in words]
+        styles = [9 for i in words]
         stroke_colors = ['black']
         stroke_widths = [3]
 
-        for line in lines:
+        for line in words:
             for style in styles: 
                 for bias in biases:
                     hand.write(
