@@ -102,7 +102,7 @@ class Hand(object):
         )
         self.nn.restore()
         self.path = path
-        self.counter = 0
+        self.counter = {}
         self.prt = 1
 
     def write(self, filename, lines, biases=None, styles=None, stroke_colors=None, stroke_widths=None):
@@ -183,16 +183,11 @@ class Hand(object):
         detachments = [-1]+list(np.where(offsets[:, 2])[0])
         coords = np.array([offsets[detachments[i]+1:detachments[i+1], :2] for i in range(len(detachments)-1)])
 
-        self.counter += 1
-        if self.counter % 5000 == 0:
+        self.counter.update({str(filename):coords})
+        if len(self.counter) % 5000 == 0:
             self.prt += 1
-
-        coords = json.dumps(str(list([list(coord) for coord in coords])))[1:-1]
-        with open(self.path+'_prt_%s.json' % self.prt, 'a') as f:
-            if self.counter == 1:
-                f.write('{"'+filename+'":'+coords)
-            else:
-                f.write(',\n"'+filename+'":'+coords)
+            with open(self.path+'_prt_%s.pickle.dat' % self.prt, 'wb') as f:
+                pickle.dump(self.counter, f)
 
 if __name__ == '__main__':
     with tf.device('/gpu:0'):
@@ -220,8 +215,5 @@ if __name__ == '__main__':
                         stroke_colors=stroke_colors,
                         stroke_widths=stroke_widths)
 
-        with open(path+'_prt_%s.json' % hand.prt, 'a') as f:
-            f.write('}')
-
         print('Prediction time: %i words, %s s' % (hand.counter, time.time()-start))
-        os.system('find %s -name "*.json" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
+        os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
