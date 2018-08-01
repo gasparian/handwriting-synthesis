@@ -184,8 +184,9 @@ class Hand(object):
         detachments = [-1]+list(np.where(offsets[:, 2])[0])
         coords = np.array([offsets[detachments[i]+1:detachments[i+1], :2] for i in range(len(detachments)-1)])
 
-        self.counter.update({str(filename):coords})
+        self.counter.update({filename:coords})
         current_length = len(self.counter)
+        print(len(current_length))
         if current_length % 5000 == 0 or current_length == self.length:
             self.prt += 1
             pickle.dump(self.counter, open(self.path+'_prt_%s.pickle.dat' % self.prt, 'wb'))
