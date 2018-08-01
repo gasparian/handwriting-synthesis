@@ -139,8 +139,8 @@ class Hand(object):
         if self.counter % 10000 == 0:
             self.prt += 1
 
-        with open(self.path+'_prt_%s.json' % self.prt, 'a') as f:
-            json.dump({"filename": coords}, f)
+        with open(self.path+'_prt_%s.pickle.dat' % self.prt, 'ab') as f:
+            pickle.dump({filename: coords}, f)
 
     def dist(self, a, b):
         return np.power((np.power((a[0] - b[0]), 2) + np.power((a[1] - b[1]), 2)), 1./2)
@@ -224,5 +224,5 @@ if __name__ == '__main__':
                         stroke_colors=stroke_colors,
                         stroke_widths=stroke_widths)
 
-        os.system('find %s -o -name "*.json" | tar -czvf %s.tar.gz -T -' % ('/'+'/'.join(path.split('/')[:-1]), path.split('/')[-1]))
+        os.system('find %s -o -name "*.pickle.dat" | tar -czvf %s.tar.gz -T -' % ('/'+'/'.join(path.split('/')[:-1]), path.split('/')[-1]))
         print('Prediction time: %s s' % (time.time()-start))
