@@ -20,12 +20,6 @@ from scipy.misc import imsave
 #docker build -t handwriting-synthesis:latest .
 #nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
 
-#drops isolated pixels
-# se1 = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
-# se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
-# img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, se1)
-# img = cv2.morphologyEx(img, cv2.MORPH_OPEN, se2)
-
 def coords2img(coords, width=3, autoscale=(64,64), offset=5):
 
     def min_max(coords):
@@ -38,7 +32,7 @@ def coords2img(coords, width=3, autoscale=(64,64), offset=5):
 
     offset += width // 2
     coords = np.delete(coords, np.where([coord.size==0 for coord in coords]))
-    
+
     min_dists, dists = {}, [[] for i in range(len(coords))]
     for i, line in enumerate(coords):
         for point in line:
@@ -73,6 +67,13 @@ def coords2img(coords, width=3, autoscale=(64,64), offset=5):
             x -= min_x-offset; y -= min_y-offset
             x_n -= min_x-offset; y_n -= min_y-offset
             draw.line([(x,y), (x_n,y_n)], fill="black", width=width)
+
+    #drops isolated pixels
+    # img = np.array(img).astype(np.uint8)
+    # se1 = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
+    # se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+    # img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, se1)
+    # img = cv2.morphologyEx(img, cv2.MORPH_OPEN, se2)
 
     return img
 
@@ -195,6 +196,7 @@ class Hand(object):
             self.counter = {}
 
 if __name__ == '__main__':
+
     with tf.device('/gpu:0'):
         start = time.time()
 
