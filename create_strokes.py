@@ -1,10 +1,15 @@
 import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '-1' #for CPU only predictions
+
 import pickle
 import logging
 import uuid
 import time
 import pickle 
 import json
+import sys
+import argparse
 
 import numpy as np
 import svgwrite
@@ -17,8 +22,11 @@ import tensorflow as tf
 from PIL import Image, ImageDraw
 from scipy.misc import imsave
 
-#docker build -t handwriting-synthesis:latest .
-#nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
+############################################################################
+# docker build -t handwriting-synthesis:latest .
+# nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
+# python3 create_strokes -p /home/imgs/pics_strokes -w /home/imgs/words.txt
+############################################################################
 
 def coords2img(coords, width=3, autoscale=(64,64), offset=5):
 
@@ -197,31 +205,34 @@ class Hand(object):
 
 if __name__ == '__main__':
 
-    with tf.device('/gpu:0'):
-        start = time.time()
+    parser = argparse.ArgumentParser(description='Process IAM dataset')
+    parser.add_argument('-p', '--path')
+    parser.add_argument('-w', '--words')
+    args = parser.parse_args()
+    globals().update(vars(args))
 
-        path = '/home/imgs/pics_strokes'
-        #words = [i[:-1] for i in open("/home/imgs/words.txt").readlines()]
-        words = ["0102", "hello world!", "1) 2) 3)"]
+    start = time.time()
 
-        biases = [.75]
-        styles = [9]
-        stroke_colors = ['black']
-        stroke_widths = [3]
+    words = [i[:-1] for i in open(words).readlines()]
 
-        words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
-        hand = Hand(path=path, length=words_count)
+    biases = [.75]
+    styles = [9]
+    stroke_colors = ['black']
+    stroke_widths = [3]
 
-        for line in tqdm(words, desc='words'):
-            for style in styles: 
-                for bias in biases:
-                    hand.write(
-                        filename='%s_b%s_s%s' % (line, bias, style),
-                        lines=[line],
-                        biases=[bias],
-                        styles=[style],
-                        stroke_colors=stroke_colors,
-                        stroke_widths=stroke_widths)
+    words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
+    hand = Hand(path=path, length=words_count)
 
-        print('Prediction time: %i words, %s s' % (words_count, time.time()-start))
-        os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
+    for line in tqdm(words, desc='words'):
+        for style in styles: 
+            for bias in biases:
+                hand.write(
+                    filename='%s_b%s_s%s' % (line, bias, style),
+                    lines=[line],
+                    biases=[bias],
+                    styles=[style],
+                    stroke_colors=stroke_colors,
+                    stroke_widths=stroke_widths)
+
+    print('Prediction time: %i words, %s s' % (words_count, time.time()-start))
+    os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
