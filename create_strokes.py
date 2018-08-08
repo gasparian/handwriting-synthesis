@@ -23,6 +23,8 @@ from PIL import Image, ImageDraw
 from scipy.misc import imsave
 
 ############################################################################
+# cd /home/handwriting-synthesis
+# git pull
 # docker build -t handwriting-synthesis:latest .
 # nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
 # python3 create_strokes -p /home/imgs/pics_strokes -w /home/imgs/words.txt
