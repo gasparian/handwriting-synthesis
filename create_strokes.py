@@ -233,7 +233,7 @@ if __name__ == '__main__':
     os.mkdir(path)
 
     start = time.time()
-    words = [i[:-1] for i in open(words).readlines()]
+    words = [i[:-1] for i in open(words).readlines() if i]
     words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
     hand = Hand(path=path, length=words_count)
 
