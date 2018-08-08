@@ -225,7 +225,6 @@ if __name__ == '__main__':
 
     ############################################################
 
-    #path += '/generated_strokes'
     try:
         rmtree(path)
     except:
@@ -233,7 +232,7 @@ if __name__ == '__main__':
     os.mkdir(path)
 
     start = time.time()
-    words = [i[:-1] for i in open(words).readlines() if i]
+    words = [i[:-1] for i in open(words).readlines() if i[:-1]]
     words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
     hand = Hand(path=path, length=words_count)
 
