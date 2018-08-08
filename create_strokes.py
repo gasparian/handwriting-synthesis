@@ -28,7 +28,7 @@ from scipy.misc import imsave
 # git pull
 # docker build -t handwriting-synthesis:latest .
 # nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
-# python3 create_strokes -p /home/imgs/pics_strokes -w /home/imgs/words.txt
+# python3 create_strokes.py -p /home/imgs/pics_strokes -w /home/imgs/words.txt
 ############################################################################
 
 def coords2img(coords, width=3, autoscale=(64,64), offset=5):
@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
     ############################################################
 
-    path += '/generated_strokes'
+    #path += '/generated_strokes'
     try:
         rmtree(path)
     except:
