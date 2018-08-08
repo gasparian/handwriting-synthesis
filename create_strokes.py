@@ -10,6 +10,7 @@ import pickle
 import json
 import sys
 import argparse
+from shutil import rmtree
 
 import numpy as np
 import svgwrite
@@ -213,19 +214,30 @@ if __name__ == '__main__':
     args = parser.parse_args()
     globals().update(vars(args))
 
-    start = time.time()
-
-    words = [i[:-1] for i in open(words).readlines()]
+    ############################################################
 
     biases = [.75]
     styles = [9]
+
+    #for now these lisrs can contain only one element
     stroke_colors = ['black']
     stroke_widths = [3]
 
+    ############################################################
+
+    path += '/generated_strokes'
+    try:
+        rmtree(path)
+    except:
+        pass
+    os.mkdir(path)
+
+    start = time.time()
+    words = [i[:-1] for i in open(words).readlines()]
     words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
     hand = Hand(path=path, length=words_count)
 
-    for line in tqdm(words, desc='words'):
+    for line in tqdm(words, desc='words', ascii=True):
         for style in styles: 
             for bias in biases:
                 hand.write(
