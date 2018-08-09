@@ -249,4 +249,4 @@ if __name__ == '__main__':
 
     print('Prediction time: %i words, %s s' % (words_count, time.time()-start))
     #os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
-    os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % (path, path))
+    os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % (path, path.split('/')[-1]))
