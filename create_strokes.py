@@ -203,7 +203,7 @@ class Hand(object):
         current_length = len(self.counter)
         if current_length % 5000 == 0 or current_length == self.length:
             self.prt += 1
-            pickle.dump(self.counter, open(self.path+'_prt_%s.pickle.dat' % self.prt, 'wb'))
+            pickle.dump(self.counter, open(self.path+'/strokes_prt_%s.pickle.dat' % self.prt, 'wb'))
             self.counter = {}
 
 if __name__ == '__main__':
@@ -248,4 +248,5 @@ if __name__ == '__main__':
                     stroke_widths=stroke_widths)
 
     print('Prediction time: %i words, %s s' % (words_count, time.time()-start))
-    os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
+    #os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % ('/'.join(path.split('/')[:-1])+'/', path))
+    os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % (path, path))
