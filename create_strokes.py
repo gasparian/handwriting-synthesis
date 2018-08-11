@@ -216,10 +216,10 @@ if __name__ == '__main__':
 
     ############################################################
 
-    biases = [.75]
-    styles = [9]
+    biases = np.linspace(0, 5, num=20) #0...5.
+    styles = range(13) #0...12
 
-    #for now these lisrs can contain only one element
+    #for now these lists can contain only one element
     stroke_colors = ['black']
     stroke_widths = [3]
 
@@ -233,19 +233,28 @@ if __name__ == '__main__':
 
     start = time.time()
     words = [i[:-1] for i in open(words).readlines() if i[:-1]]
-    words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
-    hand = Hand(path=path, length=words_count)
+    # words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
+    hand = Hand(path=path, length=len(words))
+
+    # for line in tqdm(words, desc='words', ascii=True):
+    #     for style in styles: 
+    #         for bias in biases:
+    #             hand.write(
+    #                 filename='%s_b%s_s%s' % (line, bias, style),
+    #                 lines=[line],
+    #                 biases=[bias],
+    #                 styles=[style],
+    #                 stroke_colors=stroke_colors,
+    #                 stroke_widths=stroke_widths)
 
     for line in tqdm(words, desc='words', ascii=True):
-        for style in styles: 
-            for bias in biases:
-                hand.write(
-                    filename='%s_b%s_s%s' % (line, bias, style),
-                    lines=[line],
-                    biases=[bias],
-                    styles=[style],
-                    stroke_colors=stroke_colors,
-                    stroke_widths=stroke_widths)
+        hand.write(
+            filename='%s_%s' % (line, str(uuid.uuid4())),
+            lines=[line],
+            biases=[np.random.choice(biases)],
+            styles=[np.random.choice(styles)],
+            stroke_colors=stroke_colors,
+            stroke_widths=stroke_widths)
 
     print('Prediction time: %i words, %s s' % (words_count, time.time()-start))
     os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % (path, path.split('/')[-1]))
