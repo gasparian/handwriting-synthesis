@@ -31,10 +31,10 @@ from scipy.misc import imsave
 # python3 create_strokes.py -p /home/imgs/pics_strokes -w /home/imgs/words.txt
 ############################################################################
 
-def coords2img(coords, width=3, autoscale=(64,64), offset=5):
+def coords2img(coords, width=3, autoscale=(64,64), offset=5, drop_isolated=False):
 
     def min_max(coords):
-        max_x, min_x = int(np.max(np.concatenate([coord[:, 0] for coord in coords]))), int(np.min(np.concatenate([coord[:, 0] for coord in coords]))) 
+        max_x, min_x = int(np.max(np.concatenate([coord[:, 0] for coord in coords]))), int(np.min(np.concatenate([coord[:, 0] for coord in coords])))
         max_y, min_y = int(np.max(np.concatenate([coord[:, 1] for coord in coords]))), int(np.min(np.concatenate([coord[:, 1] for coord in coords])))
         return min_x, max_x, min_y, max_y
 
@@ -80,11 +80,12 @@ def coords2img(coords, width=3, autoscale=(64,64), offset=5):
             draw.line([(x,y), (x_n,y_n)], fill="black", width=width)
 
     #drops isolated pixels
-    # img = np.array(img).astype(np.uint8)
-    # se1 = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
-    # se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
-    # img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, se1)
-    # img = cv2.morphologyEx(img, cv2.MORPH_OPEN, se2)
+    if drop_isolated:
+        img = np.array(img).astype(np.uint8)
+        se1 = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
+        se2 = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+        img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, se1)
+        img = cv2.morphologyEx(img, cv2.MORPH_OPEN, se2)
 
     return img
 
@@ -256,5 +257,5 @@ if __name__ == '__main__':
             stroke_colors=stroke_colors,
             stroke_widths=stroke_widths)
 
-    print('Prediction time: %i words, %s s' % (words_count, time.time()-start))
+    print('Prediction time: %i words, %s s' % (len(words), time.time()-start))
     os.system('find %s -name "*.pickle.dat" | exec tar -czvf %s.tar.gz -T -' % (path, path.split('/')[-1]))
