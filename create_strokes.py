@@ -27,7 +27,7 @@ from scipy.misc import imsave
 # cd /home/handwriting-synthesis
 # git pull
 # docker build -t handwriting-synthesis:latest .
-# nvidia-docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
+# docker run -v /home/temp:/home/imgs -v /home/handwriting-synthesis:/home/handwriting-synthesis -it --rm handwriting-synthesis bash
 # python3 create_strokes.py -p /home/imgs/pics_strokes -w /home/imgs/words.txt
 ############################################################################
 
@@ -209,7 +209,7 @@ class Hand(object):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Process IAM dataset')
+    parser = argparse.ArgumentParser(description='create strokes: input pathes')
     parser.add_argument('-p', '--path')
     parser.add_argument('-w', '--words')
     args = parser.parse_args()
@@ -234,19 +234,7 @@ if __name__ == '__main__':
 
     start = time.time()
     words = [i[:-1] for i in open(words).readlines() if i[:-1]]
-    # words_count = len(words)*len(biases)*len(styles)*len(stroke_colors)*len(stroke_widths)
     hand = Hand(path=path, length=len(words))
-
-    # for line in tqdm(words, desc='words', ascii=True):
-    #     for style in styles: 
-    #         for bias in biases:
-    #             hand.write(
-    #                 filename='%s_b%s_s%s' % (line, bias, style),
-    #                 lines=[line],
-    #                 biases=[bias],
-    #                 styles=[style],
-    #                 stroke_colors=stroke_colors,
-    #                 stroke_widths=stroke_widths)
 
     for line in tqdm(words, desc='words', ascii=True):
         hand.write(
